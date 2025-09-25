@@ -1,0 +1,97 @@
+// 协议缓冲区语法版本，使用 proto3
+syntax="proto3";
+
+// 定义包名，用于避免命名冲突
+package SocketGameProtocol;
+
+// 请求代码枚举
+// 用于标识不同类型请求
+enum RequestCode
+{
+  RequestNone=0;    // 无请求/默认值
+  User=1;//用户请求
+  Room=2;//房间请求
+  Game=3;//游戏请求
+}
+
+// 动作代码枚举  
+// 用于标识游戏中的各种动作类型
+enum ActionCode
+{
+  ActionNone=0;     // 无动作/默认值
+  Logon=1;//注册
+  Login=2;//登录
+  CreateRoom=3;//创建房间
+  FindRoom=4;//查找房间
+  PlayerList=5;//玩家列表
+  JoinRoom=6;//加入房间
+  Exit=7;//通用退出
+  Chat=8;//聊天
+  StartGame=9;//开始游戏
+  Starting=10;//服务端发来的游戏开始指令
+  UpdatePos=11;//更新位置
+  ExitGame=12;//退出游戏
+  UpdateCharacterList=13;//更新游戏面板角色列表
+  Fire=14;//开火
+  UpdateHp=15;//更新血条
+}
+
+// 返回代码枚举
+// 用于标识服务器返回给客户端的状态码
+enum ReturnCode
+{
+  ReturnNone=0;     // 无返回/默认值
+  Success=1;//成功
+  Fail=2;//失败
+  NoRoom=3;//没有该房间，不能直接使用 失败 来代替，因为失败有多种原因
+}
+
+// 主数据包消息
+// 网络通信的主要数据结构，包含所有通信数据
+message MainPack
+{
+  // TODO: 在此添加具体的字段定义
+  RequestCode requestCode = 1;    // 请求代码
+  ActionCode actionCode = 2;      // 动作代码  
+  ReturnCode returnCode = 3;      // 返回代码
+  LoginPack loginPack = 4;      // 登录包
+  string str=5;//存储聊天内容，同时确保MainPack不为空，因为pb只序列化被赋值且非默认值的字段
+  repeated RoomPack roomPacks=6;//房间包列表
+  repeated PlayerPack playerPacks=7;//玩家包列表
+  BulletPack bulletPack=8;//子弹包
+}
+message LoginPack
+{
+  string userName=1;//用户名
+  string password=2;//密码
+}
+message RoomPack
+{
+  string roomName=1;//房间名
+  int32 maxPlayerNum=2;//最大玩家数
+  int32 nowPlayerNum=3;//当前玩家数
+  int32 roomStatus=4;//房间状态 0等待中 1房间已满 2游戏中
+}
+message PlayerPack
+{
+  string playerName=1;//玩家名,同时用作玩家id
+  string playerId=2;//玩家ID
+  int32 playerHp=3;//玩家血量
+  PosPack posPack=4;//位置包
+  bool flipY=5;//是否翻转Y轴
+}
+//位置包
+message PosPack
+{
+  float posX=1;//X坐标
+  float posY=2;//Y坐标
+  float rotZ=3;//Z轴旋转
+  float gunRotZ=4;//枪口Z轴旋转
+}
+message BulletPack
+{
+  float posX=1;//X坐标
+  float posY=2;//Y坐标
+  float bulletSpeed=3;//子弹速度
+  float rotZ=5;//Z轴旋转
+}
